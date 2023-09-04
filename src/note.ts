@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { getEditor } from "./editorUtil";
 import { globalActiveNoteMarkers } from "./extension";
-import { getNoteMarkerRegex, getUuidFromMatch } from "./noteUtil";
+import { getNoteMarkerRegex, getNotePrefix, getUuidFromMatch } from "./noteUtil";
 
 export interface Props {
   filePath: string;
@@ -36,7 +36,7 @@ export class Note implements Props {
    static getLine = (document: vscode.TextDocument, uuid: string): number => {
     for (let lineIndex = 0; lineIndex < document.lineCount; lineIndex++) {
       const line = document.lineAt(lineIndex);
-      const charIndex = line.text.indexOf(uuid);
+      const charIndex = line.text.indexOf(`${getNotePrefix()}${uuid}`);
       if (charIndex !== -1) {
         return lineIndex;
       }
