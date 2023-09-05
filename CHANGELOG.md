@@ -38,3 +38,6 @@
 ## [2.0.0]
 
 Breaks backwards compatability. Feature overhaul into "Line Note Plus"
+
+This changelog is not active, see the commit history for changes by
+commit: https://github.com/prmichaelsen/linenoteplus/commits/mainline
