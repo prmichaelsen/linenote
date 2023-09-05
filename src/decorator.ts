@@ -47,14 +47,10 @@ export class Decorator {
       "linenoteplus.showGutterIcon"
     );
     if (showGutterIcon) {
-      let iconPath: string | null = config.get<string | null>("linenoteplus.gutterIconPath")!;
-      if (iconPath) {
-        gutterProp.gutterIconPath = iconPath;
-      } else {
-        gutterProp.gutterIconPath = this.context.asAbsolutePath(
-          "images/gutter.png"
-        );
-      }
+      const iconPath: string = config.get<string>("linenoteplus.gutterIconPath")!;
+      gutterProp.gutterIconPath = this.context.asAbsolutePath(
+        iconPath || "images/gutter.png"
+      );
       gutterProp.gutterIconSize = "cover";
     }
 
@@ -97,17 +93,16 @@ export class Decorator {
                   range: new vscode.Range(
                     // subtract 1 because api's line number starts with 0, not 1
                     noteLine.range.start,
-                    line.range.end
+                    noteLine.range.end,
                   ),
                   hoverMessage: markdown,
                 },
                 {
                   // gutter decorator
                   range: new vscode.Range(
-                    line.range.start,
+                    noteLine.range.start,
                     line.range.start
                   ),
-                  hoverMessage: markdown
                 },
                 {
                   // note marker decoratior
@@ -115,16 +110,16 @@ export class Decorator {
                     noteLine.range.start,
                     noteLine.range.end
                   ),
-                }
+                },
               ];
             }
           )
         )
       );
 
-      editor.setDecorations(this.noteMarkerDecorator!, noteMarkerProps);
       editor.setDecorations(this.lineDecorator!, lineProps);
       editor.setDecorations(this.gutterDecorator!, gutterProps);
+      editor.setDecorations(this.noteMarkerDecorator!, noteMarkerProps);
     }
   }
 }
