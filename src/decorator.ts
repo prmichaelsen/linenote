@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { filterResolved, splitArr } from "./util";
 import { Note } from "./note";
-import { getNotesDir } from "./noteUtil";
+import { getNotesDir, matchUuids } from "./noteUtil";
 
 export class Decorator {
   context: vscode.ExtensionContext;
@@ -70,7 +70,7 @@ export class Decorator {
     for (const editor of editors) {
       const noteDir = getNotesDir(editor.document.fileName);
       // load notes and create decoration options
-      const uuids = Note.matchUuids(editor.document.getText());
+      const uuids = matchUuids(editor.document.getText());
       const filePath = editor.document.uri.fsPath;
       const notes = uuids.map(uuid => new Note({
         filePath,

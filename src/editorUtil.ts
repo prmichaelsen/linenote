@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Note } from './note';
-import { getNotesDir, getOrphanedUuidsForCurDoc, isNotePath } from './noteUtil';
+import { getNotesDir, getOrphanedUuidsForCurDoc, isNotePath, matchUuids } from './noteUtil';
 import { globalActiveNoteMarkers } from './extension';
 
 
@@ -20,7 +20,7 @@ export type CleanUpOrphanedNodesConf =
   ;
 
 export const onDidSaveTextDocument = async (document: vscode.TextDocument) => {
-  const uuids: string[] = Note.matchUuids(document.getText());
+  const uuids: string[] = matchUuids(document.getText());
   const filePath = document.uri.fsPath;
   const noteDir = getNotesDir(filePath);
   await Promise.all(uuids.map(async uuid => {

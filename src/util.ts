@@ -1,12 +1,47 @@
 import * as vscode from "vscode";
+import * as path from "path";
 
 const rejected = Symbol("rejected");
 
-export const escapeRegex = (regex: string) => {
-  return regex.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
+
 
 type Result<T> = T | typeof rejected;
+
+export const normalizePath = (filePath: string) => {
+  const sep = path.sep;
+  return filePath
+    .split(sep)
+    .filter(isTruthy)
+    .join(sep)
+    ;
+}
+
+export const isValidFilePath = (filePath: string) => {
+  if (isTruthy(filePath)) {
+    try {
+      const fp = filePath.trim();
+      path.resolve(normalizePath(fp));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+  return false;
+}
+
+export const escapeRegex = (regex: string)=> {
+  if (isTruthy(regex)) {
+    return new RegExp(regex.replace(/[\.\*\+\?\^\$\{\}\(\)\|\[\]\\]/g, '\\$&')).source;
+  } else {
+    return regex;
+  }
+}
+
+export const isDefined = <T>(o: T | undefined | null): o is T =>
+  o !== undefined && o !== null;
+
+export const isTruthy = <T extends string | undefined | null>(o: T | string | undefined | null): o is string =>
+  isDefined(o) && o.trim() !== '';
 
 export const getIncludedFilePaths = async (): Promise<string[]> => {
   const fNames: string[] = [];

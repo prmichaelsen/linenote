@@ -3,7 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { getEditor } from "./editorUtil";
 import { globalActiveNoteMarkers } from "./extension";
-import { getNoteMarkerRegex, getNotePrefix, getUuidFromMatch } from "./noteUtil";
+import { getNotePrefix, matchUuid } from "./noteUtil";
 
 export interface Props {
   filePath: string;
@@ -44,31 +44,10 @@ export class Note implements Props {
     throw new Error(`Note with UUID "${uuid}" not found in document "${document.uri.fsPath}".`);
   }
 
-  static matchUuids = (text: string): string[] => {
-    const uuids: string[] = [];
-    const matches = text.match(getNoteMarkerRegex());;
-    if (!matches) {
-      return uuids;
-    }
-    for (const match of matches) {
-      uuids.push(getUuidFromMatch(match));
-    }
-    return  uuids;
-  }
-
   static matchUuidOnActiveLine = (editor: vscode.TextEditor): string | null => {
     const anchor = editor.selection.anchor;
     const line = editor.document.lineAt(anchor);
-    return Note.matchUuid(line.text);
-  }
-
-  static matchUuid = (lineText: string): string | null => {
-    const match = lineText.match(getNoteMarkerRegex());
-    if (match) {
-      const matchText = match[0];
-      return getUuidFromMatch(matchText);
-    }
-    return null;
+    return matchUuid(line.text);
   }
 
   /** does file this note targets exist? */

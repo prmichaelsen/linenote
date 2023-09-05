@@ -8,24 +8,19 @@ import {
   escapeRegex,
   getIncludedFilePaths,
   identityDiffArr,
+  isTruthy,
+  isValidFilePath,
   keys,
+  normalizePath,
 } from "./util";
 
+export const editText = '[Edit]';
+export const removeText = '[Remove]';
 
 export const getNotePrefix = () => {
   // note:getNotePrefixNote [Edit] [Remove]
   // TODO make configurable
   return 'note:';
-}
-
-export const getUuidFromMatch = (match: string) => {
-  return match.split(getNotePrefix())[1].trim();
-}
-
-export const getUuidFromNotePath = (notePath: string) => {
-  const parts = notePath.split(path.sep);
-  const uuid = parts[parts.length - 1].split('.md')[0];
-  return uuid;
 }
 
 export const getNotesDir = (filePath: string) => {
@@ -45,18 +40,79 @@ export const getNotesDir = (filePath: string) => {
   throw new Error(`Unable to find or create note directory "${relNotesDir}".`);
 }
 
-export const uuidRegex = /^[A-Za-z0-9]{1,}$/;
+// export const anyChar = escapeRegex('\\/:');
+// export const noSpace = escapeRegex('\\/: ');
+//         /note:.*(?=\[Edit\] \[Remove\])/gm.toString(),
+// export const anyChar = /\^\\\/:/.source;
+// export const noSpace = /\^\\\/: /.source;
+// export const uuidRegex = /(?<=^ )([^\\/:]| )*(?= *$)/g;
 export const getNoteMarkerRegex = () => {
-  const escapedNotePrefix = escapeRegex(getNotePrefix());
-  const regexString = `${escapedNotePrefix}[A-Za-z0-9]{1,}\\s`;
-  const regex = new RegExp(regexString, 'g');
+  const notePrefix = escapeRegex(getNotePrefix());
+  const edit = escapeRegex(editText);
+  const remove = escapeRegex(removeText);
+  const regexString = `${notePrefix} *[^ ].+(?=${edit} ${remove})`;
+  const regex = new RegExp(regexString, 'gm');
   return regex;
+}
+
+export const getUuidFromNoteMarker = (text: string) => {
+  try {
+    const back = text.split(getNotePrefix())[1].trim();
+    const uuid = back.split(`${editText} ${removeText}`)[0].trim();
+    if (isValidFilePath(uuid)) {
+      const normal =  normalizePath(uuid);
+      return isTruthy(normal) ? normal : null;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return null;
+  }
+}
+
+export const matchUuids = (text: string): string[] => {
+  const uuids: string[] = [];
+  const matches = text.match(getNoteMarkerRegex());;
+  if (!matches) {
+    return uuids;
+  }
+  for (const match of matches) {
+    const uuid = getUuidFromNoteMarker(match);
+    if (isTruthy(uuid)) {
+      uuids.push(uuid);
+    }
+  }
+  return  uuids;
+}
+
+export const matchUuid = (lineText: string): string | null => {
+  const match = lineText.match(getNoteMarkerRegex());
+  if (match) {
+    const matchText = match[0];
+    const uuid = getUuidFromNoteMarker(matchText);
+    if (isTruthy(uuid)) {
+      return uuid;
+    }
+  }
+  return null;
 }
 
 export const isNotePath = (filePath: string): boolean => {
   const noteDir = getNotesDir(filePath);
   return filePath.startsWith(noteDir);
 };
+
+// note:qX1Kfa1nHHZUA1Zy3VGsZn [Edit] [Remove]
+export const getUuidFromNotePath = (notePath: string) => {
+  try {
+    const noteDir = getNotesDir(notePath);
+    const parts = notePath.split(noteDir)[1];
+    const uuid = parts.split('.md')[0];
+    return normalizePath(uuid);
+  } catch (e) {
+    return null;
+  }
+}
 
 export const cleanUpOrphanedNotes = async () => {
   const folders = vscode.workspace.workspaceFolders;
@@ -69,7 +125,7 @@ export const cleanUpOrphanedNotes = async () => {
     const files = await fs.readdir(noteDir);
     const uuids = files
       .map(file => path.basename(file, '.md'))
-      .filter(uuidish => uuidish.match(uuidRegex))
+      // .filter(uuidish => uuidish.match(uuidRegex))
       ;
     const activeUuids = 
       keys(globalActiveNoteMarkers)
@@ -169,7 +225,7 @@ export const initializeGlobalActiveNoteMarkers = async (
     const filePaths = await getIncludedFilePaths();
     for (const filePath of filePaths) {
       const document = await vscode.workspace.openTextDocument(filePath);
-      const uuids = Note.matchUuids(document.getText());
+      const uuids = matchUuids(document.getText());
       for (const uuid of uuids) {
         const note = new Note({
           filePath,

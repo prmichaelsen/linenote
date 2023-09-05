@@ -1,14 +1,12 @@
 import { DocumentLink, DocumentLinkProvider, Position, ProviderResult, Range, TextDocument, Uri } from "vscode";
 import { Note } from "./note";
-import { getNotePrefix } from "./noteUtil";
+import { editText, getNotePrefix, matchUuids, removeText } from "./noteUtil";
 
-export const editText = '[Edit]';
-export const removeText = '[Remove]';
 export class NoteLinkProvider implements DocumentLinkProvider {
   provideDocumentLinks(document: TextDocument): ProviderResult<DocumentLink[]> {
     const links: DocumentLink[] = [];
     const text = document.getText();
-    const uuids = Note.matchUuids(text);
+    const uuids = matchUuids(text);
     for (const uuid of uuids) {
       const lineIndex = Note.getLine(document, uuid);
       const line = document.lineAt(lineIndex);

@@ -3,18 +3,20 @@ import * as path from 'path';
 import * as short from "short-uuid";
 import * as vscode from "vscode";
 import { Position } from "vscode";
-import { NoteLinkProvider, editText, removeText } from './DocumentLinkProvider';
+import { NoteLinkProvider } from './NoteLinkProvider';
 import { formatIndentation } from "./commandUtil";
 import { Decorator } from "./decorator";
 import { CleanUpOrphanedNodesConf, getEditor, onDidSaveTextDocument, updateIsActiveEditorNoteContext } from "./editorUtil";
 import { Note } from "./note";
 import {
   cleanUpOrphanedNotes,
+  editText,
   getNotePrefix,
   getNotesDir,
   getUuidFromNotePath,
   initializeGlobalActiveNoteMarkers,
   isNotePath,
+  removeText,
   watchCorrespondingNotes,
 } from "./noteUtil";
 import debounce = require("lodash.debounce");
@@ -137,6 +139,9 @@ export const activate = (context: vscode.ExtensionContext) => {
       // remove note if it is empty
       const notePath = event.uri.fsPath;
       const uuid = getUuidFromNotePath(notePath);
+      if (!uuid) {
+        return;
+      }
       const note = globalActiveNoteMarkers[uuid];
       const body = await note.read();
       if (!body.trim().length) {
@@ -167,6 +172,9 @@ export const activate = (context: vscode.ExtensionContext) => {
       const uuid = await vscode.window.showInputBox({
         placeHolder: placeHolderUuid,
         prompt: 'Enter name for note',
+        validateInput: (input: string) => {
+          return input;
+        }
       }) || placeHolderUuid;
       const marker = `${getNotePrefix()}${uuid} ${editText} ${removeText}\n`;
       const isSuccessful = await editor.edit(edit => {
@@ -260,7 +268,10 @@ export const activate = (context: vscode.ExtensionContext) => {
       if (!isNotePath(filePath)) {
         return;
       }
-      const uuid = path.basename(filePath, '.md');
+      const uuid = getUuidFromNotePath(filePath);
+      if (!uuid) {
+        throw new Error(`[ERROR] 002 - Unable to get uuid from note with filePath "${filePath}".`);
+      }
       const note = globalActiveNoteMarkers[uuid];
       if (!note) {
         throw new Error(`001: Note with uuid "${uuid}" did not exist in globalActiveNoteMarkers cache.`);
