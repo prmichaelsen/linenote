@@ -53,10 +53,7 @@
         "linenoteplus.gutterIconPath": {
           "default": "images/gutter.png",
           "description": "%configuration.gutterIconPath.description%",
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": "string"
         },
         "linenoteplus.includePaths": {
           "default": [
