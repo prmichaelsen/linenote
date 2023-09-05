@@ -5,7 +5,7 @@ import * as vscode from "vscode";
 import { Position } from "vscode";
 import { NoteLinkProvider } from './NoteLinkProvider';
 import { Decorator } from "./decorator";
-import { CleanUpOrphanedNodesConf, getEditor, onDidSaveTextDocument, updateIsActiveEditorNoteContext } from "./editorUtil";
+import { CleanUpOrphanedNodesConf, getBesideViewColumn, getEditor, getOpenNoteBehavior, onDidSaveTextDocument, updateIsActiveEditorNoteContext } from "./editorUtil";
 import { Note } from "./note";
 import {
   cleanUpOrphanedNotes,
@@ -157,6 +157,7 @@ export const activate = (context: vscode.ExtensionContext) => {
         event.affectsConfiguration("linenoteplus.removeText") ||
         event.affectsConfiguration("linenoteplus.editText") ||
         event.affectsConfiguration("linenoteplus.notePrefix") ||
+        event.affectsConfiguration("linenoteplus.openNoteBehavior") ||
         event.affectsConfiguration("linenoteplus.notesDirectory")
       ) {
         decorator.reload();
@@ -293,13 +294,9 @@ export const activate = (context: vscode.ExtensionContext) => {
       );
       const line = Note.getLine(document, uuid);
       const selection = document.lineAt(line).range;
-      const currentColumn = editor.viewColumn;
-      const viewColumns = vscode.window.visibleTextEditors.length;
-      const targetColumn = currentColumn === 1 ? 2 : 1;
       await vscode.window.showTextDocument(document, {
         selection,
-        viewColumn: viewColumns > 1 ? targetColumn
-          : vscode.ViewColumn.Beside,
+        ...getOpenNoteBehavior(),
       });;
     }),
 

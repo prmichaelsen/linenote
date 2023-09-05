@@ -35,26 +35,6 @@
     ],
     "configuration": {
       "properties": {
-        "linenoteplus.cleanUpOrphanedNotes": {
-          "default": "on-save-and-on-interval",
-          "description": "%configuration.cleanUpOrphanedNotes.description%",
-          "type": [
-            "on-save",
-            "on-interval",
-            "on-save-and-on-interval",
-            "never"
-          ]
-        },
-        "linenoteplus.cleanUpOrphanedNotesInterval": {
-          "default": 60000,
-          "description": "%configuration.cleanUpOrphanedNotesInterval.description%",
-          "type": "integer"
-        },
-        "linenoteplus.gutterIconPath": {
-          "default": "images/gutter.png",
-          "description": "%configuration.gutterIconPath.description%",
-          "type": "string"
-        },
         "linenoteplus.includePaths": {
           "default": [
             "**/src/**/*",
@@ -62,6 +42,11 @@
           ],
           "description": "%configuration.includePaths.description%",
           "type": "array"
+        },
+        "linenoteplus.notesDirectory": {
+          "default": ".vscode/.linenoteplus",
+          "description": "%configuration.notesDirectory.description%",
+          "type": "string"
         },
         "linenoteplus.lineColor": {
           "default": "rgba(255, 255, 0, 0.05)",
@@ -71,16 +56,6 @@
         "linenoteplus.rulerColor": {
           "default": "rgba(255, 255, 0, 0.4)",
           "description": "%configuration.rulerColor.description%",
-          "type": "string"
-        },
-        "linenoteplus.showGutterIcon": {
-          "default": true,
-          "description": "%configuration.showGutterIcon.description%",
-          "type": "boolean"
-        },
-        "linenoteplus.notesDirectory": {
-          "default": ".vscode/.linenoteplus",
-          "description": "%configuration.notesDirectory.description%",
           "type": "string"
         },
         "linenoteplus.notePrefix": {
@@ -96,6 +71,41 @@
         "linenoteplus.removeText": {
           "default": "[Remove]",
           "description": "%configuration.removeText.description%",
+          "type": "string"
+        },
+        "linenoteplus.openNoteBehavior": {
+          "default": "Beside",
+          "description": "%configuration.openNoteBehavior.description%",
+          "oneOf": [
+            "Beside",
+            "Active",
+            "PreserveFocus"
+          ],
+          "type": "string"
+        },
+        "linenoteplus.cleanUpOrphanedNotes": {
+          "default": "on-save-and-on-interval",
+          "description": "%configuration.cleanUpOrphanedNotes.description%",
+          "type": [
+            "on-save",
+            "on-interval",
+            "on-save-and-on-interval",
+            "never"
+          ]
+        },
+        "linenoteplus.cleanUpOrphanedNotesInterval": {
+          "default": 60000,
+          "description": "%configuration.cleanUpOrphanedNotesInterval.description%",
+          "type": "integer"
+        },
+        "linenoteplus.showGutterIcon": {
+          "default": true,
+          "description": "%configuration.showGutterIcon.description%",
+          "type": "boolean"
+        },
+        "linenoteplus.gutterIconPath": {
+          "default": "images/gutter.png",
+          "description": "%configuration.gutterIconPath.description%",
           "type": "string"
         }
       },
@@ -170,5 +180,5 @@
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
-  "version": "2.4.2"
+  "version": "2.5.0"
 }

@@ -1,7 +1,7 @@
 import * as fs from "fs-extra";
 import * as path from "path";
 import * as vscode from "vscode";
-import { getEditor } from "./editorUtil";
+import { getOpenNoteBehavior } from "./editorUtil";
 import { globalActiveNoteMarkers } from "./extension";
 import { getNotePrefix, matchUuid } from "./noteUtil";
 
@@ -69,19 +69,14 @@ export class Note implements Props {
     }
   }
 
-  async open(): Promise<void> {
+  async open(options?: vscode.TextDocumentShowOptions): Promise<void> {
     globalActiveNoteMarkers[this.uuid] = this;
-    const editor = getEditor();
-    const currentColumn = editor.viewColumn;
-    const viewColumns = vscode.window.visibleTextEditors.length;
-    const targetColumn = currentColumn === 1 ? 2 : 1;
     await vscode.commands.executeCommand(
       "vscode.open",
       vscode.Uri.file(this.notePath),
       {
-        preview: false,
-        viewColumn: viewColumns > 1 ? targetColumn
-          : vscode.ViewColumn.Beside,
+        ...getOpenNoteBehavior(),
+        ...options,
       }
     );
   }
