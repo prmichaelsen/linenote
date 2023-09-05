@@ -168,13 +168,20 @@ export const activate = (context: vscode.ExtensionContext) => {
       const anchor = editor.selection.anchor;
       const commentPos = new Position(anchor.line, 0);
       const placeHolderUuid = short.generate().toString();
-      const uuid = await vscode.window.showInputBox({
+      const input = await vscode.window.showInputBox({
         placeHolder: placeHolderUuid,
         prompt: 'Enter name for note',
         validateInput: (input: string) => {
-          return input;
+          if (input !== '' && input.trim() === '') {
+            return 'Note names must not be empty';
+          }
+          if (input.trim().startsWith(path.sep)) {
+            return 'Note names cannot begin with ' + path.sep;
+          }
+          return null;
         }
       }) || placeHolderUuid;
+      const uuid = input.trim();
       const marker = `${getNotePrefix()}${uuid} ${editText} ${removeText}\n`;
       const isSuccessful = await editor.edit(edit => {
           edit.insert(commentPos, marker);
