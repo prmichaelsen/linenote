@@ -3,6 +3,7 @@
   "command.openNote.title": "Line Note Plus: Edit note at current position (Open Note)",
   "command.removeNote.title": "Line Note Plus: Remove note at current position (Delete Note)",
   "command.revealLine.title": "Line Note Plus: Reveal line in notated file (Show Note Marker)",
+  "command.showPreviewToSide.title": "Line Note Plus: Open preview to side (Show Markdown Preview)",
   "configuration.cleanUpOrphanedNotes.description": "Defines the cleanup behavior for orphaned notes. It can be set to `on-save`, `on-interval`, `on-save-and-on-interval`, or `never`. Default: `on-save-and-on-internal`. Note that when using `on-save` or `on-save-and-on-interval`, if you delete a note marker and save the file then your note file will also be deleted.",
   "configuration.cleanUpOrphanedNotesInterval.description": "Interval at which to clean up unused notes in the background in ms. Only applies if `cleanUpOrphanedNotes` is set to `on-interval` or `on-save-and-on-interval`. Default: `60000` (60s). For performance, a larger value is recommended.",
   "configuration.editText.description": "The edit link text.",

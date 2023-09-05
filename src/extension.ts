@@ -250,6 +250,49 @@ export const activate = (context: vscode.ExtensionContext) => {
       }
     }),
 
+    registerCommand('linenoteplus.showPreviewToSide', async (uuid?: string) => {
+      const editor = getEditor();
+      const filePath = editor.document.uri.fsPath;
+      const noteDir = getNotesDir(editor.document.fileName);
+      if (!noteDir) {
+        return;
+      }
+      if (!fs.existsSync(noteDir)) {
+          vscode.window.showErrorMessage(`Can only edit existing notes.`);
+          return;
+      }
+      if (uuid) {
+        const note = new Note({
+          noteDir,
+          filePath,
+          uuid,
+          line: Note.getLine(editor.document, uuid),
+        });
+        await note.open({ 
+          viewColumn: getBesideViewColumn(),
+          preserveFocus: false,
+        });
+        await vscode.commands.executeCommand('markdown.showPreview');
+        return;
+      }
+      const _uuid = Note.matchUuidOnActiveLine(editor);
+      if (_uuid) {
+          const note = new Note({
+            noteDir,
+            filePath,
+            uuid: _uuid,
+            line: Note.getLine(editor.document, _uuid),
+          });
+          await note.open({ 
+            viewColumn: getBesideViewColumn(),
+            preserveFocus: false,
+          });
+          await vscode.commands.executeCommand('markdown.showPreview');
+      } else {
+          vscode.window.showErrorMessage("Select a note marker to edit a note.");
+      }
+    }),
+
     registerCommand(
       "linenoteplus.removeNote",
       async (uuid?: string) => {

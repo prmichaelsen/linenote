@@ -63,8 +63,8 @@ export const getNotesDir = (filePath: string) => {
 // export const uuidRegex = /(?<=^ )([^\\/:]| )*(?= *$)/g;
 export const getNoteMarkerRegex = () => {
   const notePrefix = escapeRegex(getNotePrefix());
-  const edit = escapeRegex(editText);
-  const remove = escapeRegex(removeText);
+  const edit = escapeRegex(getEditText());
+  const remove = escapeRegex(getRemoveText());
   const regexString = `${notePrefix} *[^ ].+(?=${edit} ${remove})`;
   const regex = new RegExp(regexString, 'gm');
   return regex;
@@ -73,7 +73,7 @@ export const getNoteMarkerRegex = () => {
 export const getUuidFromNoteMarker = (text: string) => {
   try {
     const back = text.split(getNotePrefix())[1].trim();
-    const uuid = back.split(`${editText} ${removeText}`)[0].trim();
+    const uuid = back.split(`${getEditText()} ${getRemoveText()}`)[0].trim();
     if (isValidFilePath(uuid)) {
       const normal =  normalizePath(uuid);
       return isTruthy(normal) ? normal : null;
@@ -87,7 +87,8 @@ export const getUuidFromNoteMarker = (text: string) => {
 
 export const matchUuids = (text: string): string[] => {
   const uuids: string[] = [];
-  const matches = text.match(getNoteMarkerRegex());;
+  const regex = getNoteMarkerRegex();
+  const matches = text.match(regex);
   if (!matches) {
     return uuids;
   }

@@ -31,6 +31,10 @@
       {
         "command": "linenoteplus.removeNote",
         "title": "%command.removeNote.title%"
+      },
+      {
+        "command": "linenoteplus.showPreviewToSide",
+        "title": "%command.showPreviewToSide.title%"
       }
     ],
     "configuration": {
@@ -180,5 +184,5 @@
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
-  "version": "2.5.0"
+  "version": "2.6.0"
 }
