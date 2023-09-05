@@ -4,7 +4,6 @@ import * as short from "short-uuid";
 import * as vscode from "vscode";
 import { Position } from "vscode";
 import { NoteLinkProvider } from './NoteLinkProvider';
-import { formatIndentation } from "./commandUtil";
 import { Decorator } from "./decorator";
 import { CleanUpOrphanedNodesConf, getEditor, onDidSaveTextDocument, updateIsActiveEditorNoteContext } from "./editorUtil";
 import { Note } from "./note";
@@ -189,7 +188,7 @@ export const activate = (context: vscode.ExtensionContext) => {
           // TODO add a check here to make sure this works - otherwise I should remove the
           // marker. - indiejames
           await vscode.commands.executeCommand('editor.action.commentLine');
-          await formatIndentation();
+          await vscode.commands.executeCommand('editor.action.formatSelection');
       }
       const note = new Note({
         filePath,
