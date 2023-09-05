@@ -111,24 +111,12 @@ export class Note implements Props {
 
     if (await this.noteExists()) {
       const noteText = await this.read();
-      if (noteText.trim() !== '') {
+      if (noteText.trim() !== "") {
         body = await this.read();
       }
+      // note: Remove Edit and Remove Footer [Edit] [Remove]
     }
-
-    // create footer
-    const edit = `[Edit](${vscode.Uri.parse(
-      `command:linenoteplus.openNote?${encodeURIComponent(
-        JSON.stringify(this.uuid)
-      )}`
-    )})`;
-    const remove = `[Remove](${vscode.Uri.parse(
-      `command:linenoteplus.removeNote?${encodeURIComponent(
-        JSON.stringify(this.uuid)
-      )}`
-    )})`;
-
-    return `${body}\n\n${edit} ${remove}`;
+    return body;
   }
 
   async remove(): Promise<void> {

@@ -9,13 +9,13 @@ import { CleanUpOrphanedNodesConf, getEditor, onDidSaveTextDocument, updateIsAct
 import { Note } from "./note";
 import {
   cleanUpOrphanedNotes,
-  editText,
+  getEditText,
   getNotePrefix,
   getNotesDir,
+  getRemoveText,
   getUuidFromNotePath,
   initializeGlobalActiveNoteMarkers,
   isNotePath,
-  removeText,
   watchCorrespondingNotes,
 } from "./noteUtil";
 import debounce = require("lodash.debounce");
@@ -154,6 +154,9 @@ export const activate = (context: vscode.ExtensionContext) => {
         event.affectsConfiguration("linenoteplus.rulerColor") || 
         event.affectsConfiguration("linenoteplus.cleanupOrphanedNotes") ||
         event.affectsConfiguration("linenoteplus.cleanupOrphanedNotesInterval") ||
+        event.affectsConfiguration("linenoteplus.removeText") ||
+        event.affectsConfiguration("linenoteplus.editText") ||
+        event.affectsConfiguration("linenoteplus.notePrefix") ||
         event.affectsConfiguration("linenoteplus.notesDirectory")
       ) {
         decorator.reload();
@@ -182,7 +185,7 @@ export const activate = (context: vscode.ExtensionContext) => {
         }
       }) || placeHolderUuid;
       const uuid = input.trim();
-      const marker = `${getNotePrefix()}${uuid} ${editText} ${removeText}\n`;
+      const marker = `${getNotePrefix()}${uuid} ${getEditText()} ${getRemoveText()}\n`;
       const isSuccessful = await editor.edit(edit => {
           edit.insert(commentPos, marker);
       }, {

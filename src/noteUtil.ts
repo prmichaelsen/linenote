@@ -14,13 +14,28 @@ import {
   normalizePath,
 } from "./util";
 
-export const editText = '[Edit]';
-export const removeText = '[Remove]';
+let removeText: string;
+export const getRemoveText = () => {
+  if (!removeText) {
+    removeText = vscode.workspace.getConfiguration().get<string>('linenoteplus.removeText')!;
+  }
+  return removeText;
+}
 
+let editText: string;
+export const getEditText = () => {
+  if (!editText) {
+    editText = vscode.workspace.getConfiguration().get<string>('linenoteplus.editText')!;
+  }
+  return editText;
+};
+
+let notePrefix: string;
 export const getNotePrefix = () => {
-  // note:getNotePrefixNote [Edit] [Remove]
-  // TODO make configurable
-  return 'note:';
+  if (!notePrefix) {
+    notePrefix = vscode.workspace.getConfiguration().get<string>('linenoteplus.notePrefix')!;
+  }
+  return notePrefix;
 }
 
 export const getNotesDir = (filePath: string) => {

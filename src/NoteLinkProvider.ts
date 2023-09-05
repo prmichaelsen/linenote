@@ -1,6 +1,6 @@
 import { DocumentLink, DocumentLinkProvider, Position, ProviderResult, Range, TextDocument, Uri } from "vscode";
 import { Note } from "./note";
-import { editText, getNotePrefix, matchUuids, removeText } from "./noteUtil";
+import { getEditText, getNotePrefix, getRemoveText, matchUuids } from "./noteUtil";
 
 export class NoteLinkProvider implements DocumentLinkProvider {
   provideDocumentLinks(document: TextDocument): ProviderResult<DocumentLink[]> {
@@ -10,18 +10,18 @@ export class NoteLinkProvider implements DocumentLinkProvider {
     for (const uuid of uuids) {
       const lineIndex = Note.getLine(document, uuid);
       const line = document.lineAt(lineIndex);
-      const editIndex = line.text.indexOf(editText);
+      const editIndex = line.text.indexOf(getEditText());
       const editPosition = new Position(line.lineNumber, editIndex);
-      const editEndPosition = new Position(line.lineNumber, editIndex + editText.length);
+      const editEndPosition = new Position(line.lineNumber, editIndex + getEditText().length);
       const editRange = new Range(editPosition, editEndPosition);
       const editUri = Uri.parse(
         `command:linenoteplus.openNote?${encodeURIComponent(
           JSON.stringify(uuid)
         )}`
       );
-      const removeIndex = line.text.indexOf(removeText);
+      const removeIndex = line.text.indexOf(getRemoveText());
       const removePosition = new Position(line.lineNumber, removeIndex);
-      const removeEndPosition = new Position(line.lineNumber, removeIndex + removeText.length);
+      const removeEndPosition = new Position(line.lineNumber, removeIndex + getRemoveText().length);
       const removeRange = new Range(removePosition, removeEndPosition);
       const removeUri = Uri.parse(
         `command:linenoteplus.removeNote?${encodeURIComponent(

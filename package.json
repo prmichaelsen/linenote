@@ -82,6 +82,21 @@
           "default": ".vscode/.linenoteplus",
           "description": "%configuration.notesDirectory.description%",
           "type": "string"
+        },
+        "linenoteplus.notePrefix": {
+          "default": "note: ",
+          "description": "%configuration.notePrefix.description%",
+          "type": "string"
+        },
+        "linenoteplus.editText": {
+          "default": "[Edit]",
+          "description": "%configuration.editText.description%",
+          "type": "string"
+        },
+        "linenoteplus.removeText": {
+          "default": "[Remove]",
+          "description": "%configuration.removeText.description%",
+          "type": "string"
         }
       },
       "title": "Line Note Plus",
@@ -155,5 +170,5 @@
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
-  "version": "2.3.2"
+  "version": "2.4.2"
 }

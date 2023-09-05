@@ -10,5 +10,8 @@
   "configuration.lineColor.description": "Sets the background color for inline note markers (Name, HEX, or RGB).",
   "configuration.notesDirectory.description": "Directory to store saved notes. Default: `.vscode/.linenoteplus`.",
   "configuration.rulerColor.description": "Sets the ruler color for notated lines (Name, HEX, or RGB).",
-  "configuration.showGutterIcon.description": "Whether to display the gutter icon in the gutter for a noted line. Default: `true`."
+  "configuration.showGutterIcon.description": "Whether to display the gutter icon in the gutter for a noted line. Default: `true`.",
+  "configuration.notePrefix.description": "The prefix to use to match note markers.",
+  "configuration.editText.description": "The edit link text.",
+  "configuration.removeText.description": "The remove link text."
 }
