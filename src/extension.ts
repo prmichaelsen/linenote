@@ -78,7 +78,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // set cleanup orphaned nodes logic
   // based on conf
-  const cleanUpStrategy = Config.cleanUpOrphanedNotes.cached();
+  const innerAsync = async () => {
+  const cleanUpStrategy = await Config.cleanUpOrphanedNotes.forceMiss();
   switch (cleanUpStrategy) {
     case "on-save":
       cleanupOnSave();
@@ -94,6 +95,8 @@ export const activate = async (context: vscode.ExtensionContext) => {
     case "never":
     default:
   }
+};
+  innerAsync();
 
   const decorateDebounce = debounce({
     wait: 500,
