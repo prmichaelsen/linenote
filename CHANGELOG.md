@@ -15,3 +15,6 @@ Complete refactor. Major notes:
 ## [3.0.1]
 * Line Note Plus debug output channel no 
   longer shows automatically to reduce noise.
+
+## [3.0.2]
+* Fix up clean up initialization never firing
