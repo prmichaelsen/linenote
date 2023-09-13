@@ -11,6 +11,6 @@ export const ErrorCodes = {
     '[Error_0002]: Unable to get uuid from note with filePath "${filePath}".'
   ),
   Error_0003: tempalte<{ uuid: string, path: string }>()(
-    '[Error_0001]: Note with uuid "${uuid}" not found in document "${path}".'
+    '[Error_0003]: Note with uuid "${uuid}" not found in document "${path}".'
   ),
 };
