@@ -76,6 +76,8 @@ was also informed by Marginalia by indiejames.
 * https://github.com/tkrkt/linenote
 * https://github.com/indiejames/marginalia
 
+### Contributing
+PRs for bugfixes are welcome. I have no roadmap for new features, only improving stability.
 
 ### Known Bugs
 * Gutter icon does not display.
