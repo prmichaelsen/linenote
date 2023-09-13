@@ -1,6 +1,6 @@
 import { ErrorCodes } from "../../lib/ErrorCodes";
 import { getEditor } from "../../lib/getters/getEditor";
-import { getNoteCache } from "../../lib/getters/getNoteCache";
+import { getNoteCache, initializeGlobalNoteCache } from "../../lib/getters/getNoteCache";
 import { Note } from "../../models/Note";
 import { getOpenNoteBehavior } from "../../utils/helpers/misc-utils";
 import { getUuidFromNotePath } from "../../utils/helpers/note-path-utils";
@@ -12,25 +12,28 @@ export const revealLine = async () => {
   const filePath = editor.document.uri.fsPath;
   const uuid = await getUuidFromNotePath(filePath);
   if (!uuid) {
-    getOutputChannel().appendLine((ErrorCodes['Error_0002']({ filePath })));
+    getOutputChannel().appendLine(ErrorCodes["Error_0002"]({ filePath }));
     return;
   }
-  const note = getNoteCache().get(uuid);
+  let note = getNoteCache().get(uuid);
   if (!note) {
-    getOutputChannel().appendLine((ErrorCodes['Error_0001']({ uuid })));
+    // refresh cache if not found
+    await initializeGlobalNoteCache();
+    note = getNoteCache().get(uuid);
+    if (!note) {
+      window.showErrorMessage(ErrorCodes["Error_0001"]({ uuid }));
+      return;
+    }
+  }
+  if (!(await note.fsExists())) {
     return;
   }
-  if (!await note.fsExists()) {
-    return;
-  }
-  const document = await workspace.openTextDocument(
-    Uri.file(note.targetPath)
-  );
+  const document = await workspace.openTextDocument(Uri.file(note.targetPath));
   const line = Note.getLine(document, uuid);
   const selection = document.lineAt(line).range;
   await window.showTextDocument(document, {
     selection,
     ...getOpenNoteBehavior(),
-  });;
+  });
 };
 
