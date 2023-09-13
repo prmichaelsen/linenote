@@ -133,7 +133,7 @@ export class Note implements NoteProps {
       }
     }
     const ext = path.extname(this.selfPath);
-    if (ext !== 'md' && ext !== '') {
+    if (ext !== '.md' && ext !== '') {
       body = '```\n' + body + '\n```';
     }
 

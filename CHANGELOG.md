@@ -22,3 +22,7 @@ Complete refactor. Major notes:
 ## [3.0.3]
 * `cleanUpOrphanedNotes` on inteval is deleting
   notes it shouldn't. Disabling it for now.
+
+## [3.0.4]
+* Fix issue with notes not rendering as 
+  markdown.
