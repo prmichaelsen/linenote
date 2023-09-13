@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "types": "off",
+    "nsTypes": "off",
+    "exports": "off"
+  },
+  "workspaces": {
+    ".": {
+      "entry": "src/extension.ts"
+    }
+  }
+}
