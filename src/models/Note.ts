@@ -7,7 +7,7 @@ import { getNotePathFromUuid } from "../utils/helpers/note-path-utils";
 import { getNoteCache } from "../lib/getters/getNoteCache";
 import { Config } from "../lib/caches/ConfigurationCache";
 import { ErrorCodes } from "../lib/ErrorCodes";
-import { log } from "../extension/output/getOutputChannel";
+import { getOutputChannel, log } from "../extension/output/getOutputChannel";
 
 export interface NoteProps {
   targetPath: string;
@@ -53,7 +53,7 @@ export class Note implements NoteProps {
         return lineIndex;
       }
     }
-    vscode.window.showErrorMessage(
+    getOutputChannel().appendLine(
       ErrorCodes.Error_0003({ uuid, path: document.uri.fsPath})
     );
     return -1;
