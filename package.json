@@ -75,7 +75,7 @@
           "type": "string"
         },
         "linenoteplus.cleanUpOrphanedNotes": {
-          "default": "on-save-and-on-interval",
+          "default": "on-save",
           "description": "%configuration.cleanUpOrphanedNotes.description%",
           "type": [
             "on-save",
@@ -161,5 +161,5 @@
     "watch": "tsc -watch -p ./",
     "knip": "knip"
   },
-  "version": "3.0.2"
+  "version": "3.0.3"
 }

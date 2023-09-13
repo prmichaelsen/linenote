@@ -85,13 +85,17 @@ export const activate = async (context: vscode.ExtensionContext) => {
       cleanupOnSave();
       break;
     case "on-interval":
-      cleanUpOnInterval();
+      // cleanUpOnInterval();
+      vscode.window.showWarningMessage('on-interval currently unsupported to due issue [#5](https://github.com/prmichaelsen/linenoteplus/issues/5). Change'
+      + ' config value for cleanUpOrphanedNotes to on-save or never to stop seeing this warning on startup.');
       break;
     case "on-save-and-on-interval":
       cleanupOnSave();
-      cleanUpOnInterval();
+      // cleanUpOnInterval();
+      vscode.window.showWarningMessage('on-save-and-on-interval currently unsupported to due issue [#5](https://github.com/prmichaelsen/linenoteplus/issues/5). Change'
+        + ' config value for cleanUpOrphanedNotes to on-save or never to stop seeing this warning on startup.'
+      );
       break;
-    case "on-save-and-on-interval":
     case "never":
     default:
   }

@@ -18,3 +18,7 @@ Complete refactor. Major notes:
 
 ## [3.0.2]
 * Fix up clean up initialization never firing
+
+## [3.0.3]
+* `cleanUpOrphanedNotes` on inteval is deleting
+  notes it shouldn't. Disabling it for now.
