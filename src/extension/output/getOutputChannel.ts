@@ -8,7 +8,6 @@ export const getOutputChannel = () => {
   }
   return _channel;
 }
-getOutputChannel().show(true);
 
 const _timer = <T extends (...args: any[]) => any>(name: string, fn: T): (...args: Parameters<T>) => ReturnType<T> => {
   return time(

@@ -3,11 +3,15 @@
 ## [3.0.0]
 
 Complete refactor. Major notes:
-* looks for `.linenoteplus` file to determine your
+* Looks for `.linenoteplus` file to determine your
   note directory
-* allows any valid file path as a note marker
+* Allows any valid file path as a note marker
   and note will be created at that path
-* link a note to an existing source file
-  by entering that files relative path.
-* rewrite caching
-* factor out commands, etc
+* Link a note to an existing source file
+  by entering that file's relative path.
+* Rewrite caching
+* Factor out commands, etc
+
+## [3.0.1]
+* Line Note Plus debug output channel no 
+  longer shows automatically to reduce noise.
