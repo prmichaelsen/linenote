@@ -5,17 +5,20 @@ import { Note } from "../../models/Note";
 import { getOpenNoteBehavior } from "../../utils/helpers/misc-utils";
 import { getUuidFromNotePath } from "../../utils/helpers/note-path-utils";
 import { Uri, window, workspace } from "vscode";
+import { getOutputChannel } from "../output/getOutputChannel";
 
 export const revealLine = async () => {
   const editor = getEditor();
   const filePath = editor.document.uri.fsPath;
   const uuid = await getUuidFromNotePath(filePath);
   if (!uuid) {
-    throw new Error(ErrorCodes['Error_0002']({ filePath }));
+    getOutputChannel().appendLine((ErrorCodes['Error_0002']({ filePath })));
+    return;
   }
   const note = getNoteCache().get(uuid);
   if (!note) {
-    throw new Error(ErrorCodes['Error_0001']({ uuid }));
+    getOutputChannel().appendLine((ErrorCodes['Error_0001']({ uuid })));
+    return;
   }
   if (!await note.fsExists()) {
     return;
