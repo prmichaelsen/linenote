@@ -13,6 +13,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": false,
     "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules",

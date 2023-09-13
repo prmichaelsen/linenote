@@ -1,0 +1,17 @@
+http://localhost:3000/ig1npEbjSLGg0xqz0exN
+It seems like some buggy behavior I've been 
+experiencing may be on account of not cleaning up 
+the cache.
+
+I've been running into instances where saving a file
+after deleting a note would cause it to delete
+one extra line on save. I think this is because
+of some logic I have in one of the on saves
+for checking if a note was manually deleted.
+Perhaps the cache is being hit twice for
+the same "removal" operation.
+
+I've also noticed the cleaning up of orphans in
+the background can kill files you're working on.
+
+It should not sweep any editors that are "dirty".

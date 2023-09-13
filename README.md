@@ -35,10 +35,10 @@ Notes are saved by default in `$PROJECT_ROOT/.vscode/.linenoteplus` like `.vscod
 
 ### API
 #### Commands
-* `linenouteplus.addNote`: Add note at current position (Annotate Line)
-* `linenouteplus.openNote`: Edit note at current position (Open Note)
-* `linenouteplus.revealLine`: Reveal line in notated file (Show Note Marker)
-* `linenouteplus.removeNote`: Remove note at current position (Delete Note)
+* `linenoteplus.addNote`: Add note at current position (Annotate Line)
+* `linenoteplus.openNote`: Edit note at current position (Open Note)
+* `linenoteplus.revealLine`: Reveal line in notated file (Show Note Marker)
+* `linenoteplus.removeNote`: Remove note at current position (Delete Note)
 
 #### Configuration
 - `linenoteplus.cleanUpOrphanedNotesInterval`: Interval at which to clean up unused notes in the background in ms. Only applies if `cleanUpOrphanedNotes` is set to `on-interval` or `on-save-and-on-interval`. Default: `60000` (60s). For performance, a larger value is recommended.
@@ -79,3 +79,5 @@ was also informed by Marginalia by indiejames.
 
 ### Known Bugs
 * Gutter icon does not display.
+
+[VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=prmichaelsen.linenoteplus)

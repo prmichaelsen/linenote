@@ -3,8 +3,15 @@
 out/test/**
 src/**
 .gitignore
+.vscodeignore
 **/tsconfig.json
 **/tslint.json
 **/*.map
 **/*.ts
 **/*.log
+**/*.md
+**/*.vsix
+**/.notes/**
+knip.json
+tslint.json
+tsconfig.json

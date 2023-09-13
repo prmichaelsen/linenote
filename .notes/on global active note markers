@@ -1,0 +1,15 @@
+### globalActiveNote Markers
+
+`getNoteCache` is a serializable cache of the 
+current notes structure. If you need to include properties
+that are not serializable, use a separate utility class,
+
+That said, be sure to include props you want to serialize
+on the `Note` itself. 
+
+### TODO
+
+I need a trash mechanism. Notes should go to trash first
+if they were deleted or unlinked. Pasting the marker
+into the same or another file should revive the note
+rather than creating a new blank one.

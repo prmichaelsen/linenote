@@ -1,131 +1,125 @@
-import * as fs from 'fs-extra';
-import * as path from 'path';
-import * as short from "short-uuid";
 import * as vscode from "vscode";
-import { Position } from "vscode";
-import { NoteLinkProvider } from './NoteLinkProvider';
-import { Decorator } from "./decorator";
-import { CleanUpOrphanedNodesConf, getBesideViewColumn, getEditor, getOpenNoteBehavior, onDidSaveTextDocument, updateIsActiveEditorNoteContext } from "./editorUtil";
-import { Note } from "./note";
-import {
-  cleanUpOrphanedNotes,
-  getEditText,
-  getNotePrefix,
-  getNotesDir,
-  getRemoveText,
-  getUuidFromNotePath,
-  initializeGlobalActiveNoteMarkers,
-  isNotePath,
-  watchCorrespondingNotes,
-} from "./noteUtil";
-import debounce = require("lodash.debounce");
+import { NoteLinkProvider } from './extension/providers/NoteLinkProvider';
+import { Decorator } from "./extension/decorators/decorator";
+import { getEditor } from './lib/getters/getEditor';
+import { Note } from "./models/Note";
+import { getNoteCache, initializeGlobalNoteCache } from './lib/getters/getNoteCache';
+import { onDidSaveTextDocument } from './extension/events/onDidSaveTextDocument';
+import { Context, ContextCache } from './lib/caches/ContextCache';
+import { Config, ConfigurationCache } from './lib/caches/ConfigurationCache';
+import { debounce } from './utils/std/debounce';
+import { onDidCloseTextDocument } from './extension/events/onDidCloseTextDocument';
+import { updateIsActiveEditorNoteContext } from "./utils/helpers/misc-utils";
+import { addNote, openNote, revealLine, showPreviewToSide } from "./extension/commands";
+import { refreshCache } from "./lib/cache/refreshCache";
+import { cleanUpOrphanedNotes } from "./utils/helpers/note-utils";
 
-export type GlobalActiveNoteMarkers = Record<string, Note>;
-export const globalActiveNoteMarkers: GlobalActiveNoteMarkers = {};
+export const activate = async (context: vscode.ExtensionContext) => {
+  initializeGlobalNoteCache();
+  refreshCache<ContextCache>(Context);
+  refreshCache<ConfigurationCache>(Config);
 
-export const activate = (context: vscode.ExtensionContext) => {
   const provider = new NoteLinkProvider();
-  const documentLinkDisposable = vscode.languages.registerDocumentLinkProvider('*', provider);
-
-  initializeGlobalActiveNoteMarkers(globalActiveNoteMarkers);
+  const documentLinkDisposable = vscode.languages.registerDocumentLinkProvider(
+    "*",
+    provider
+  );
 
   const decorator: Decorator = new Decorator(context);
   let disposed: boolean = false;
 
+  // exclude notes dirs by default
   const conf = vscode.workspace.getConfiguration();
-  const exclude: any = conf.get('files.exclude');
-  const noteDir: any = conf.get('linenoteplus.notesDirectory');
+  const exclude: any = conf.get("files.exclude");
+  const notesDirs = Context.notesDir.cached();
   const excludeFiles = {
     ...exclude,
-    [noteDir]: true,
   };
-  conf.update('files.exclude', excludeFiles);
-  
+  for (const _workspaceFolder in notesDirs) {
+    // make this configurable. (show or hide on default)
+    // const notesDir = notesDirs[workspaceFolder];
+    // excludeFiles[notesDir] = true;
+  }
+  conf.update("files.exclude", excludeFiles);
+  // end
+
+  let tid: NodeJS.Timer;
   const cleanUpOnInterval = () => {
     // watch orphaned notes
-    const automaticallyDelete = async () => {
-      if (disposed) {
-        return;
+    if (disposed) {
+      if (tid) {
+        clearTimeout(tid);
       }
-      const interval = vscode.workspace
-        .getConfiguration()
-        .get("linenoteplus.cleanUpOrphanedNotesInterval");
-      if (typeof interval === "number" && interval >= 0) {
+      return;
+    }
+    const interval = Config.cleanUpOrphanedNotesInterval.cached();
+    const cleanUpStrategy = Config.cleanUpOrphanedNotes.cached();
+    if (typeof interval === "number" && interval >= 0) {
+      if (
+        ["on-interval", "on-save-and-on-interval"].some(
+          (s) => s === cleanUpStrategy
+        )
+      ) {
+        cleanUpOrphanedNotes();
         const start = +new Date();
-        await cleanUpOrphanedNotes();
         const duration = +new Date() - start;
-        setTimeout(automaticallyDelete, Math.max(0, interval - duration));
+        tid = setTimeout(cleanUpOnInterval, Math.max(0, interval - duration));
+      } else {
+        clearTimeout(tid);
       }
-    };
-  }
+    }
+  };
 
   const cleanupOnSave = () => {
     context.subscriptions.push(
       vscode.workspace.onDidSaveTextDocument(onDidSaveTextDocument)
     );
-  }
+  };
 
   // set cleanup orphaned nodes logic
   // based on conf
-  const cleanupOrphanedNodes =
-    conf.get<CleanUpOrphanedNodesConf>('linenoteplus.cleanUpOrphanedNotes')!;
-  switch (cleanupOrphanedNodes) {
-    case 'on-save':
+  const cleanUpStrategy = Config.cleanUpOrphanedNotes.cached();
+  switch (cleanUpStrategy) {
+    case "on-save":
       cleanupOnSave();
       break;
-    case 'on-interval':
+    case "on-interval":
       cleanUpOnInterval();
       break;
-    case 'on-save-and-on-interval': 
+    case "on-save-and-on-interval":
       cleanupOnSave();
       cleanUpOnInterval();
       break;
-    case 'on-save-and-on-interval': 
-    case 'never':
+    case "on-save-and-on-interval":
+    case "never":
     default:
   }
 
-  const decorateDebounce = debounce(() => {
-    if (disposed) {
-      return;
-    }
-    decorator.decorate();
-  }, 500);
+  const decorateDebounce = debounce({
+    wait: 500,
+    func: () => {
+      if (disposed) {
+        return;
+      }
+      decorator.decorate();
+    },
+  });
   decorateDebounce();
-
-  // watch note files
-  let unwatch: (() => void) | undefined;
-  const watch = async () => {
-    if (unwatch) {
-      unwatch();
-      unwatch = void 0;
-    }
-    if (disposed) {
-      return;
-    }
-    const editor = vscode.window.activeTextEditor;
-    if (editor) {
-      const fsPath = editor.document.uri.fsPath;
-      unwatch = await watchCorrespondingNotes(fsPath, decorateDebounce);
-    }
-  };
-  watch();
 
   const registerCommand = vscode.commands.registerCommand;
   context.subscriptions.push(
     new vscode.Disposable(() => (disposed = true)),
 
-    documentLinkDisposable, 
+    documentLinkDisposable,
 
-    vscode.window.onDidChangeActiveTextEditor(editor => {
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
       if (editor) {
         updateIsActiveEditorNoteContext();
-        watch();
         decorateDebounce();
       }
     }),
 
-    vscode.workspace.onDidChangeTextDocument(event => {
+    vscode.workspace.onDidChangeTextDocument((event) => {
       if (
         vscode.window.activeTextEditor &&
         event.document === vscode.window.activeTextEditor.document
@@ -134,215 +128,64 @@ export const activate = (context: vscode.ExtensionContext) => {
       }
     }),
 
-    vscode.workspace.onDidCloseTextDocument(async event => {
-      // remove note if it is empty
-      const notePath = event.uri.fsPath;
-      const uuid = getUuidFromNotePath(notePath);
-      if (!uuid) {
-        return;
-      }
-      const note = globalActiveNoteMarkers[uuid];
-      const body = await note.read();
-      if (!body.trim().length) {
-        await vscode.commands.executeCommand('linenoteplus.removeNote', uuid);
-      }
-    }),
+    vscode.workspace.onDidCloseTextDocument(onDidCloseTextDocument),
 
-    vscode.workspace.onDidChangeConfiguration(async event => {
+    vscode.workspace.onDidChangeConfiguration(async (event) => {
       if (
         event.affectsConfiguration("linenoteplus.lineColor") ||
-        event.affectsConfiguration("linenoteplus.rulerColor") || 
-        event.affectsConfiguration("linenoteplus.cleanupOrphanedNotes") ||
-        event.affectsConfiguration("linenoteplus.cleanupOrphanedNotesInterval") ||
-        event.affectsConfiguration("linenoteplus.removeText") ||
-        event.affectsConfiguration("linenoteplus.editText") ||
-        event.affectsConfiguration("linenoteplus.notePrefix") ||
-        event.affectsConfiguration("linenoteplus.openNoteBehavior") ||
-        event.affectsConfiguration("linenoteplus.notesDirectory")
+        event.affectsConfiguration("linenoteplus.rulerColor")
       ) {
         decorator.reload();
         decorator.decorate();
       }
+      if (
+        event.affectsConfiguration("linenoteplus.cleanUpOrphanedNotes") ||
+        event.affectsConfiguration("linenoteplus.cleanUpOrphanedNotesInterval")
+      ) {
+        // TODO
+        // initializeCleanupStrategy
+        await vscode.window.showInformationMessage(
+          "Line Note Plus: Configuration updates to cleanUpOrphanedNotes or " +
+            "cleanUpOrphanedNotesInterval requires reloading."
+        );
+        await vscode.commands.executeCommand(
+          "workbench.action.reloadExtension"
+        );
+      }
+      if (
+        event.affectsConfiguration("linenoteplus.removeText") ||
+        event.affectsConfiguration("linenoteplus.editText") ||
+        event.affectsConfiguration("linenoteplus.notePrefix") ||
+        event.affectsConfiguration("linenoteplus.openNoteBehavior")
+      ) {
+      }
     }),
 
-    registerCommand('linenoteplus.addNote', async (_uuid?: string) => {
-      const editor = getEditor();
-      const filePath = editor.document.uri.fsPath;
-      const noteDir = getNotesDir(editor.document.fileName);
-      const anchor = editor.selection.anchor;
-      const commentPos = new Position(anchor.line, 0);
-      const placeHolderUuid = short.generate().toString();
-      const input = await vscode.window.showInputBox({
-        placeHolder: placeHolderUuid,
-        prompt: 'Enter name for note',
-        validateInput: (input: string) => {
-          if (input !== '' && input.trim() === '') {
-            return 'Note names must not be empty';
-          }
-          if (input.trim().startsWith(path.sep)) {
-            return 'Note names cannot begin with ' + path.sep;
-          }
-          return null;
-        }
-      }) || placeHolderUuid;
-      const uuid = input.trim();
-      const marker = `${getNotePrefix()}${uuid} ${getEditText()} ${getRemoveText()}\n`;
-      const isSuccessful = await editor.edit(edit => {
-          edit.insert(commentPos, marker);
-      }, {
-          undoStopAfter: false,
-          undoStopBefore: false
-      });
-      // Use editor actions to comment the marker - this lets us work with any language - indejames
-      if (isSuccessful) {
-          await vscode.commands.executeCommand("cursorMove", { to: "up" });
-          // TODO add a check here to make sure this works - otherwise I should remove the
-          // marker. - indiejames
-          await vscode.commands.executeCommand('editor.action.commentLine');
-          await vscode.commands.executeCommand('editor.action.formatSelection');
-      }
-      const note = new Note({
-        filePath,
-        noteDir,
-        uuid,
-        line: Note.getLine(editor.document, uuid),
-      });
-      globalActiveNoteMarkers[uuid] = note;
-      // create empty note if it does not exist
-      if (!(await note.noteExists())) {
-        await note.write("");
-      }
-      await note.open();
-    }),
+    registerCommand("linenoteplus.addNote", addNote),
 
-    registerCommand('linenoteplus.openNote', async (uuid?: string) => {
-      const editor = getEditor();
-      const filePath = editor.document.uri.fsPath;
-      const noteDir = getNotesDir(editor.document.fileName);
-      if (!noteDir) {
-        return;
-      }
-      if (!fs.existsSync(noteDir)) {
-          vscode.window.showErrorMessage(`Can only edit existing notes.`);
-          return;
-      }
-      if (uuid) {
-        const note = new Note({
-          noteDir,
-          filePath,
-          uuid,
-          line: Note.getLine(editor.document, uuid),
-        });
-        await note.open();
-        return;
-      }
-      const _uuid = Note.matchUuidOnActiveLine(editor);
+    registerCommand("linenoteplus.openNote", openNote),
+
+    registerCommand("linenoteplus.showPreviewToSide", showPreviewToSide),
+
+    registerCommand("linenoteplus.removeNote", async (uuid?: string) => {
+      const _uuid = uuid || Note.matchUuidOnActiveLine(getEditor());
       if (_uuid) {
-          const note = new Note({
-            noteDir,
-            filePath,
-            uuid: _uuid,
-            line: Note.getLine(editor.document, _uuid),
-          });
-          await note.open();
-      } else {
-          vscode.window.showErrorMessage("Select a note marker to edit a note.");
-      }
-    }),
-
-    registerCommand('linenoteplus.showPreviewToSide', async (uuid?: string) => {
-      const editor = getEditor();
-      const filePath = editor.document.uri.fsPath;
-      const noteDir = getNotesDir(editor.document.fileName);
-      if (!noteDir) {
-        return;
-      }
-      if (!fs.existsSync(noteDir)) {
-          vscode.window.showErrorMessage(`Can only edit existing notes.`);
-          return;
-      }
-      if (uuid) {
-        const note = new Note({
-          noteDir,
-          filePath,
-          uuid,
-          line: Note.getLine(editor.document, uuid),
-        });
-        await note.open({ 
-          viewColumn: getBesideViewColumn(),
-          preserveFocus: false,
-        });
-        await vscode.commands.executeCommand('markdown.showPreview');
-        return;
-      }
-      const _uuid = Note.matchUuidOnActiveLine(editor);
-      if (_uuid) {
-          const note = new Note({
-            noteDir,
-            filePath,
-            uuid: _uuid,
-            line: Note.getLine(editor.document, _uuid),
-          });
-          await note.open({ 
-            viewColumn: getBesideViewColumn(),
-            preserveFocus: false,
-          });
-          await vscode.commands.executeCommand('markdown.showPreview');
-      } else {
-          vscode.window.showErrorMessage("Select a note marker to edit a note.");
-      }
-    }),
-
-    registerCommand(
-      "linenoteplus.removeNote",
-      async (uuid?: string) => {
-        const _uuid = uuid || Note.matchUuidOnActiveLine(getEditor());
-        if (_uuid) {
-          // remove specified note (when invoked from the hover text)
-          const note = globalActiveNoteMarkers[_uuid];
-          if (note.line > -1) {
-            const uri = vscode.Uri.parse(note.filePath);
-            const document = await vscode.workspace.openTextDocument(uri);
-            const line = document.lineAt(note.line);
-            const edit = new vscode.WorkspaceEdit();
-            edit.delete(uri, line.rangeIncludingLineBreak);
-            vscode.workspace.applyEdit(edit);
-          }
-          await note.remove();
-          decorateDebounce();
-          return;
+        // remove specified note (when invoked from the hover text)
+        const note = getNoteCache().get(_uuid);
+        if (note.line > -1) {
+          const uri = vscode.Uri.parse(note.targetPath);
+          const document = await vscode.workspace.openTextDocument(uri);
+          const line = document.lineAt(note.line);
+          const edit = new vscode.WorkspaceEdit();
+          edit.delete(uri, line.rangeIncludingLineBreak);
+          vscode.workspace.applyEdit(edit);
         }
+        await note.remove();
+        decorateDebounce();
       }
-    ),
-
-    registerCommand("linenoteplus.revealLine", async () => {
-      const editor = getEditor();
-      const filePath = editor.document.uri.fsPath;
-      if (!isNotePath(filePath)) {
-        return;
-      }
-      const uuid = getUuidFromNotePath(filePath);
-      if (!uuid) {
-        throw new Error(`[ERROR] 002 - Unable to get uuid from note with filePath "${filePath}".`);
-      }
-      const note = globalActiveNoteMarkers[uuid];
-      if (!note) {
-        throw new Error(`001: Note with uuid "${uuid}" did not exist in globalActiveNoteMarkers cache.`);
-      }
-      if (!await note.fsExists()) {
-        return;
-      }
-      const document = await vscode.workspace.openTextDocument(
-        vscode.Uri.file(note.filePath)
-      );
-      const line = Note.getLine(document, uuid);
-      const selection = document.lineAt(line).range;
-      await vscode.window.showTextDocument(document, {
-        selection,
-        ...getOpenNoteBehavior(),
-      });;
     }),
 
+    registerCommand("linenoteplus.revealLine", revealLine)
   );
 };
 

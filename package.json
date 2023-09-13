@@ -39,19 +39,6 @@
     ],
     "configuration": {
       "properties": {
-        "linenoteplus.includePaths": {
-          "default": [
-            "**/src/**/*",
-            "**/.vscode/.linenoteplus/**/*"
-          ],
-          "description": "%configuration.includePaths.description%",
-          "type": "array"
-        },
-        "linenoteplus.notesDirectory": {
-          "default": ".vscode/.linenoteplus",
-          "description": "%configuration.notesDirectory.description%",
-          "type": "string"
-        },
         "linenoteplus.lineColor": {
           "default": "rgba(255, 255, 0, 0.05)",
           "description": "%configuration.lineColor.description%",
@@ -63,17 +50,17 @@
           "type": "string"
         },
         "linenoteplus.notePrefix": {
-          "default": "note: ",
+          "default": "📌 ",
           "description": "%configuration.notePrefix.description%",
           "type": "string"
         },
         "linenoteplus.editText": {
-          "default": "[Edit]",
+          "default": "📝",
           "description": "%configuration.editText.description%",
           "type": "string"
         },
         "linenoteplus.removeText": {
-          "default": "[Remove]",
+          "default": "🗑️",
           "description": "%configuration.removeText.description%",
           "type": "string"
         },
@@ -128,30 +115,22 @@
       ]
     }
   },
-  "contributors": [
-    {
-      "email": "jamesnorton@gmail.com",
-      "name": "James Norton",
-      "url": "https://github.com/indiejames"
-    },
-    {
-      "name": "tkrkt",
-      "url": "https://github.com/tkrkt"
-    }
-  ],
   "dependencies": {
-    "@types/fs-extra": "^5.0.4",
-    "chokidar": "^2.0.4",
     "fs-extra": "^7.0.1",
-    "lodash.debounce": "^4.0.8",
+    "ignore-walk": "^6.0.3",
+    "node-fetch": "^2.3.2",
     "short-uuid": "^4.2.2"
   },
-  "description": "Annotate lines of code with Markdown notes visible on hover.",
+  "description": "Annotate lines of code with Markdown notes.",
   "devDependencies": {
     "@types/chokidar": "^1.7.5",
-    "@types/lodash.debounce": "^4.0.4",
+    "@types/fs-extra": "^11.0.1",
+    "@types/ignore-walk": "^4.0.0",
     "@types/mocha": "^2.2.42",
     "@types/node": "^8.10.25",
+    "@types/node-fetch": "^2.6.4",
+    "@types/request": "^2.48.8",
+    "madge": "^6.1.0",
     "tslint": "^5.8.0",
     "typescript": "^3.1.4",
     "vscode": "^1.1.37"
@@ -184,5 +163,5 @@
     "vscode:prepublish": "npm run compile",
     "watch": "tsc -watch -p ./"
   },
-  "version": "2.6.0"
+  "version": "3.0.0"
 }
