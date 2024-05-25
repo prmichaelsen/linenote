@@ -1,4 +1,12 @@
-import { DocumentLink, DocumentLinkProvider, Position, ProviderResult, Range, TextDocument, Uri } from "vscode";
+import {
+  DocumentLink,
+  DocumentLinkProvider,
+  Position,
+  ProviderResult,
+  Range,
+  TextDocument,
+  Uri,
+} from "vscode";
 import { matchUuids } from "../../utils/helpers/match-helpers";
 import { Note } from "../../models/Note";
 import { Config } from "../../lib/caches/ConfigurationCache";
@@ -16,7 +24,10 @@ export class NoteLinkProvider implements DocumentLinkProvider {
       const line = document.lineAt(lineIndex);
       const editIndex = line.text.indexOf(editText);
       const editPosition = new Position(line.lineNumber, editIndex);
-      const editEndPosition = new Position(line.lineNumber, editIndex + editText.length);
+      const editEndPosition = new Position(
+        line.lineNumber,
+        editIndex + editText.length
+      );
       const editRange = new Range(editPosition, editEndPosition);
       const editUri = Uri.parse(
         `command:linenoteplus.openNote?${encodeURIComponent(
@@ -28,7 +39,10 @@ export class NoteLinkProvider implements DocumentLinkProvider {
 
       const removeIndex = line.text.indexOf(removeText);
       const removePosition = new Position(line.lineNumber, removeIndex);
-      const removeEndPosition = new Position(line.lineNumber, removeIndex + removeText.length);
+      const removeEndPosition = new Position(
+        line.lineNumber,
+        removeIndex + removeText.length
+      );
       const removeRange = new Range(removePosition, removeEndPosition);
       const removeUri = Uri.parse(
         `command:linenoteplus.removeNote?${encodeURIComponent(
@@ -38,10 +52,10 @@ export class NoteLinkProvider implements DocumentLinkProvider {
       const removeLink = new DocumentLink(removeRange, removeUri);
       links.push(removeLink);
 
+      // TODO check for either ducky or note prefix
       const prefixIdx = [notePrefix]
         .map((p) => line.text.indexOf(p))
-        .find((idx) => idx !== -1)
-        ;
+        .find((idx) => idx !== -1);
       if (prefixIdx) {
         const openPosition = new Position(line.lineNumber, prefixIdx);
         const openEndPosition = new Position(line.lineNumber, editIndex - 1);
