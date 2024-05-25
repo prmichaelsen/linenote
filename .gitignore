@@ -1,5 +1,7 @@
-out
-node_modules
+/out
+/node_modules
+/build
+/coverage
 .vscode-test/
 *.vsix
 *.log

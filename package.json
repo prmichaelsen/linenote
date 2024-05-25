@@ -1,14 +1,39 @@
 {
+  "name": "linenoteplus",
+  "version": "4.0.0",
+  "displayName": "Line Note Plus",
+  "license": "MIT",
+  "main": "./build/extension.js",
+  "keywords": [],
+  "publisher": "prmichaelsen",
+  "readme": "./README.md",
+  "description": "Annotate lines of code with Markdown notes.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prmichaelsen/linenoteplus.git"
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "check-circular-dependencies": "madge --circular --extensions js ./",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=./build/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "test-compile": "tsc -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "jest",
+    "prettier": "prettier --write ."
+  },
   "activationEvents": [
     "onStartupFinished"
   ],
   "author": {
-    "email": "patrickazusa@gmail.com",
+    "email": "michaelsenpatrick@gmail.com",
     "name": "Patrick Michaelsen",
     "url": "https://github.com/prmichaelsen"
   },
   "bugs": {
-    "email": "patrickazusa@gmail.com",
+    "email": "michaelsenpatrick@gmail.com",
     "url": "https://github.com/prmichaelsen/linenoteplus/issues"
   },
   "categories": [
@@ -38,6 +63,8 @@
       }
     ],
     "configuration": {
+      "title": "Line Note Plus",
+      "type": "object",
       "properties": {
         "linenoteplus.lineColor": {
           "default": "rgba(255, 255, 0, 0.05)",
@@ -75,7 +102,7 @@
           "type": "string"
         },
         "linenoteplus.cleanUpOrphanedNotes": {
-          "default": "on-save",
+          "default": "on-save-and-on-interval",
           "description": "%configuration.cleanUpOrphanedNotes.description%",
           "type": [
             "on-save",
@@ -99,9 +126,7 @@
           "description": "%configuration.gutterIconPath.description%",
           "type": "string"
         }
-      },
-      "title": "Line Note Plus",
-      "type": "object"
+      }
     },
     "menus": {
       "editor/context": [
@@ -120,46 +145,20 @@
     "ignore-walk": "^6.0.3",
     "short-uuid": "^4.2.2"
   },
-  "description": "Annotate lines of code with Markdown notes.",
   "devDependencies": {
+    "@types/chokidar": "^1.7.5",
     "@types/fs-extra": "^11.0.1",
     "@types/ignore-walk": "^4.0.0",
     "@types/mocha": "^2.2.42",
     "@types/node": "^8.10.25",
-    "knip": "^2.24.0",
+    "esbuild": "^0.21.4",
     "madge": "^6.1.0",
     "tslint": "^5.8.0",
     "typescript": "^3.1.4",
     "vscode": "^1.1.37"
   },
-  "displayName": "Line Note Plus",
   "engines": {
     "vscode": "^1.30.0"
   },
-  "icon": "images/icon.png",
-  "keywords": [
-    "note",
-    "comment",
-    "annotation",
-    "sidenotes",
-    "marginalia"
-  ],
-  "license": "MIT",
-  "main": "./out/extension.js",
-  "name": "linenoteplus",
-  "publisher": "prmichaelsen",
-  "readme": "./README.md",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/prmichaelsen/linenoteplus.git"
-  },
-  "scripts": {
-    "compile": "tsc -p ./",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "npm run compile && node ./node_modules/vscode/bin/test",
-    "vscode:prepublish": "npm run compile",
-    "watch": "tsc -watch -p ./",
-    "knip": "knip"
-  },
-  "version": "3.0.4"
+  "icon": "images/icon.png"
 }

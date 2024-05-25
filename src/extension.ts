@@ -1,16 +1,24 @@
 import * as vscode from "vscode";
-import { NoteLinkProvider } from './extension/providers/NoteLinkProvider';
+import { NoteLinkProvider } from "./extension/providers/NoteLinkProvider";
 import { Decorator } from "./extension/decorators/decorator";
-import { getEditor } from './lib/getters/getEditor';
+import { getEditor } from "./lib/getters/getEditor";
 import { Note } from "./models/Note";
-import { getNoteCache, initializeGlobalNoteCache } from './lib/getters/getNoteCache';
-import { onDidSaveTextDocument } from './extension/events/onDidSaveTextDocument';
-import { Context, ContextCache } from './lib/caches/ContextCache';
-import { Config, ConfigurationCache } from './lib/caches/ConfigurationCache';
-import { debounce } from './utils/std/debounce';
-import { onDidCloseTextDocument } from './extension/events/onDidCloseTextDocument';
+import {
+  getNoteCache,
+  initializeGlobalNoteCache,
+} from "./lib/getters/getNoteCache";
+import { onDidSaveTextDocument } from "./extension/events/onDidSaveTextDocument";
+import { Context, ContextCache } from "./lib/caches/ContextCache";
+import { Config, ConfigurationCache } from "./lib/caches/ConfigurationCache";
+import { debounce } from "./utils/std/debounce";
+import { onDidCloseTextDocument } from "./extension/events/onDidCloseTextDocument";
 import { updateIsActiveEditorNoteContext } from "./utils/helpers/misc-utils";
-import { addNote, openNote, revealLine, showPreviewToSide } from "./extension/commands";
+import {
+  addNote,
+  openNote,
+  revealLine,
+  showPreviewToSide,
+} from "./extension/commands";
 import { refreshCache } from "./lib/cache/refreshCache";
 import { cleanUpOrphanedNotes } from "./utils/helpers/note-utils";
 
@@ -78,29 +86,21 @@ export const activate = async (context: vscode.ExtensionContext) => {
 
   // set cleanup orphaned nodes logic
   // based on conf
-  const innerAsync = async () => {
-  const cleanUpStrategy = await Config.cleanUpOrphanedNotes.forceMiss();
+  const cleanUpStrategy = Config.cleanUpOrphanedNotes.cached();
   switch (cleanUpStrategy) {
     case "on-save":
       cleanupOnSave();
       break;
     case "on-interval":
-      // cleanUpOnInterval();
-      vscode.window.showWarningMessage('on-interval currently unsupported to due issue [#5](https://github.com/prmichaelsen/linenoteplus/issues/5). Change'
-      + ' config value for cleanUpOrphanedNotes to on-save or never to stop seeing this warning on startup.');
+      cleanUpOnInterval();
       break;
     case "on-save-and-on-interval":
       cleanupOnSave();
-      // cleanUpOnInterval();
-      vscode.window.showWarningMessage('on-save-and-on-interval currently unsupported to due issue [#5](https://github.com/prmichaelsen/linenoteplus/issues/5). Change'
-        + ' config value for cleanUpOrphanedNotes to on-save or never to stop seeing this warning on startup.'
-      );
+      cleanUpOnInterval();
       break;
     case "never":
     default:
   }
-};
-  innerAsync();
 
   const decorateDebounce = debounce({
     wait: 500,
@@ -189,10 +189,10 @@ export const activate = async (context: vscode.ExtensionContext) => {
         }
         await note.remove();
         decorateDebounce();
+        return;
       }
     }),
 
     registerCommand("linenoteplus.revealLine", revealLine)
   );
 };
-

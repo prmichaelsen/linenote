@@ -1,9 +1,8 @@
 .vscode/**
 .vscode-test/**
-out/test/**
 src/**
+/src
 .gitignore
-.vscodeignore
 **/tsconfig.json
 **/tslint.json
 **/*.map
@@ -11,7 +10,10 @@ src/**
 **/*.log
 **/*.md
 **/*.vsix
-**/.notes/**
-knip.json
-tslint.json
-tsconfig.json
+.notes
+/node_modules
+/build
+/coverage
+.vscode-test/
+*.vsix
+*.log

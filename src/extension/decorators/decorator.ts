@@ -25,7 +25,8 @@ export class Decorator {
       this.noteMarkerDecorator.dispose();
     }
 
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration();
+    const config: vscode.WorkspaceConfiguration =
+      vscode.workspace.getConfiguration();
 
     const noteMarkerProp: vscode.DecorationRenderOptions = {};
     const gutterProp: vscode.DecorationRenderOptions = {};
@@ -47,18 +48,20 @@ export class Decorator {
       "linenoteplus.showGutterIcon"
     );
     if (showGutterIcon) {
-      const iconPath: string = config.get<string>("linenoteplus.gutterIconPath")!;
+      const iconPath: string = config.get<string>(
+        "linenoteplus.gutterIconPath"
+      )!;
       gutterProp.gutterIconPath = this.context.asAbsolutePath(
         iconPath || "images/gutter.png"
       );
       gutterProp.gutterIconSize = "cover";
     }
 
-    this.noteMarkerDecorator = vscode.window.createTextEditorDecorationType(noteMarkerProp);
+    this.noteMarkerDecorator =
+      vscode.window.createTextEditorDecorationType(noteMarkerProp);
     this.lineDecorator = vscode.window.createTextEditorDecorationType({});
-    this.gutterDecorator = vscode.window.createTextEditorDecorationType(
-      gutterProp
-    );
+    this.gutterDecorator =
+      vscode.window.createTextEditorDecorationType(gutterProp);
   }
 
   async decorate() {
@@ -66,21 +69,26 @@ export class Decorator {
     for (const editor of editors) {
       // load notes and create decoration options
       const uuids = matchUuids(editor.document.getText());
-      const notes = await Promise.all(uuids.map(async uuid => 
-        Note.asNote(editor.document, uuid)
-      ));
+      const notes = await Promise.all(
+        uuids.map(async (uuid) => Note.asNote(editor.document, uuid))
+      );
       const [lineProps, gutterProps, noteMarkerProps] = splitArr(
         await filterResolved(
           notes.map(
             async (
               note
-            ): Promise<[vscode.DecorationOptions, vscode.DecorationOptions, vscode.DecorationOptions]> => {
+            ): Promise<
+              [
+                vscode.DecorationOptions,
+                vscode.DecorationOptions,
+                vscode.DecorationOptions
+              ]
+            > => {
               const markdown = new vscode.MarkdownString(
                 await note.readAsMarkdown()
               );
               markdown.isTrusted = true;
               const noteLine = editor.document.lineAt(note.line);
-              const line = editor.document.lineAt(note.line + 1);
               return [
                 {
                   // line decorator
@@ -88,7 +96,7 @@ export class Decorator {
                   range: new vscode.Range(
                     // subtract 1 because api's line number starts with 0, not 1
                     noteLine.range.start,
-                    noteLine.range.end,
+                    noteLine.range.end
                   ),
                   hoverMessage: markdown,
                 },
@@ -96,7 +104,7 @@ export class Decorator {
                   // gutter decorator
                   range: new vscode.Range(
                     noteLine.range.start,
-                    line.range.start
+                    noteLine.range.start
                   ),
                 },
                 {

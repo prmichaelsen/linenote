@@ -7,7 +7,7 @@ import { getNotePathFromUuid } from "../utils/helpers/note-path-utils";
 import { getNoteCache } from "../lib/getters/getNoteCache";
 import { Config } from "../lib/caches/ConfigurationCache";
 import { ErrorCodes } from "../lib/ErrorCodes";
-import { getOutputChannel, log } from "../extension/output/getOutputChannel";
+import { log } from "../extension/output/getOutputChannel";
 
 export interface NoteProps {
   targetPath: string;
@@ -41,23 +41,26 @@ export class Note implements NoteProps {
     });
   }
 
-  static getLine = log.time('getLine', (document: vscode.TextDocument, uuid: string): number => {
-    const notePrefix = Config.notePrefix.cached();
-    for (let lineIndex = 0; lineIndex < document.lineCount; lineIndex++) {
-      const line = document.lineAt(lineIndex);
-      const isMatch = [notePrefix]
-        .map((p) => p + " " + uuid)
-        .some((m) => line.text.includes(m));
-      // const charIndex = line.text.indexOf(`${getNotePrefix()} ${uuid}`);
-      if (isMatch) {
-        return lineIndex;
+  static getLine = log.time(
+    "getLine",
+    (document: vscode.TextDocument, uuid: string): number => {
+      const notePrefix = Config.notePrefix.cached();
+      for (let lineIndex = 0; lineIndex < document.lineCount; lineIndex++) {
+        const line = document.lineAt(lineIndex);
+        const isMatch = [notePrefix]
+          .map((p) => p + " " + uuid)
+          .some((m) => line.text.includes(m));
+        // const charIndex = line.text.indexOf(`${getNotePrefix()} ${uuid}`);
+        if (isMatch) {
+          return lineIndex;
+        }
       }
+      vscode.window.showErrorMessage(
+        ErrorCodes.Error_0003({ uuid, path: document.uri.fsPath })
+      );
+      return -1;
     }
-    getOutputChannel().appendLine(
-      ErrorCodes.Error_0003({ uuid, path: document.uri.fsPath})
-    );
-    return -1;
-  });
+  );
 
   static matchUuidOnActiveLine = (editor: vscode.TextEditor): string | null => {
     const anchor = editor.selection.anchor;
@@ -125,7 +128,6 @@ export class Note implements NoteProps {
   async readAsMarkdown(): Promise<string> {
     let body = "\\<empty note\\>";
 
-
     if (await this.noteExists()) {
       const noteText = await this.read();
       if (noteText.trim() !== "") {
@@ -133,8 +135,8 @@ export class Note implements NoteProps {
       }
     }
     const ext = path.extname(this.selfPath);
-    if (ext !== '.md' && ext !== '') {
-      body = '```\n' + body + '\n```';
+    if (ext !== "md" && ext !== "") {
+      body = "```\n" + body + "\n```";
     }
 
     return body;

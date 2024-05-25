@@ -1,24 +1,32 @@
 import { Config } from "../../lib/caches/ConfigurationCache";
-import { escapeRegex, isValidFilePath, normalizePath, isTruthy } from "../utils";
+import {
+  escapeRegex,
+  isValidFilePath,
+  normalizePath,
+  isTruthy,
+} from "../utils";
 
 export const getNoteMarkerRegex = () => {
   const notePrefix = escapeRegex(Config.notePrefix.cached());
   const edit = escapeRegex(Config.editText.cached());
   const remove = escapeRegex(Config.removeText.cached());
   const regexString = `(${notePrefix}) *[^ ].+(?=${edit} ${remove})`;
-  const regex = new RegExp(regexString, 'gm');
+  const regex = new RegExp(regexString, "gm");
   return regex;
-}
+};
 
 export const getUuidFromNoteMarker = (text: string) => {
-  const prefix = [Config.notePrefix.cached()]
-    .find((prefix) => text.includes(prefix));
+  const prefix = [Config.notePrefix.cached()].find((prefix) =>
+    text.includes(prefix)
+  );
   if (!prefix) {
     return null;
   }
   try {
     const back = text.split(prefix)[1].trim();
-    const uuid = back.split(`${Config.editText.cached()} ${Config.removeText.cached()}`)[0].trim();
+    const uuid = back
+      .split(`${Config.editText.cached()} ${Config.removeText.cached()}`)[0]
+      .trim();
     if (isValidFilePath(uuid)) {
       const normal = normalizePath(uuid);
       return isTruthy(normal) ? normal : null;
@@ -28,7 +36,7 @@ export const getUuidFromNoteMarker = (text: string) => {
   } catch (e) {
     return null;
   }
-}
+};
 
 export const matchUuids = (text: string): string[] => {
   const uuids: string[] = [];
@@ -43,8 +51,8 @@ export const matchUuids = (text: string): string[] => {
       uuids.push(uuid);
     }
   }
-  return  uuids;
-}
+  return uuids;
+};
 
 export const matchUuid = (lineText: string): string | null => {
   const match = lineText.match(getNoteMarkerRegex());
@@ -56,4 +64,4 @@ export const matchUuid = (lineText: string): string | null => {
     }
   }
   return null;
-}
+};

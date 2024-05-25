@@ -4,7 +4,6 @@ import { Note } from "../../models/Note";
 import { getIncludedFilePaths } from "../../utils/helpers/note-path-utils";
 import { getCacheFactory } from "../cache/getCacheFactory";
 import { log } from "../../extension/output/getOutputChannel";
-import * as path from 'path';
 
 // 📌 on global active note markers 📝 🗑
 export const getNoteCache = log.time(
@@ -21,9 +20,7 @@ async () => {
     const filePaths = await getIncludedFilePaths();
     for (const targetPath of filePaths) {
       try {
-        const document = await workspace.openTextDocument(
-          path.join(_folder.uri.fsPath, targetPath)
-        );
+        const document = await workspace.openTextDocument(targetPath);
         const uuids = matchUuids(document.getText());
         for (const uuid of uuids) {
           const note = Note.asNote(document, uuid);

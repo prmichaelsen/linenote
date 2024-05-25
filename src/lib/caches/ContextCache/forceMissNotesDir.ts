@@ -1,11 +1,13 @@
-import * as path from 'path';
+import * as path from "path";
 import * as fs from "fs-extra";
-import { workspace, window } from 'vscode';
-import { getOutputChannel, log } from '../../../extension/output/getOutputChannel';
-import walk from 'ignore-walk';
+import { workspace, window } from "vscode";
+import {
+  getOutputChannel,
+  log,
+} from "../../../extension/output/getOutputChannel";
+import walk from "ignore-walk";
 
-
-const helpText = `
+const lineNotePlusHelpText = `
 # The location of this \`.linenoteplus\` file determines
 # the path to store and retrieve your notes.
 
@@ -13,20 +15,18 @@ const helpText = `
 # the directory that contains this \`.linenoteplus\` file.
 `.trim();
 
-export const forceMissNotesDir = log.time(
-  'forceMissedNotesDir', 
-async () => {
+export const forceMissNotesDir = log.time("forceMissedNotesDir", async () => {
   const notesDirByWorkspaceFolder: Record<string, string> = {};
   const workspaceFolders = workspace.workspaceFolders!;
   for (const folder of workspaceFolders) {
     try {
       const folderPath = folder.uri.fsPath;
       const name = folder.name;
-      const _files = await walk({ 
-          path: folder.uri.fsPath,
-          ignoreFiles: ['.ignore', '.gitignore'],
-        });
-      const files = _files.filter(f => f.includes('.linenoteplus'));
+      const _files = await walk({
+        path: folder.uri.fsPath,
+        ignoreFiles: [".ignore", ".gitignore"],
+      });
+      const files = _files.filter((f) => f.includes(".linenoteplus"));
 
       // no .linenoteplus found, create it at default
       // location
@@ -37,7 +37,7 @@ async () => {
         }
         fs.writeFileSync(
           path.join(notesDir, ".linenoteplus"),
-          helpText
+          lineNotePlusHelpText
         );
         notesDirByWorkspaceFolder[name] = notesDir;
       }

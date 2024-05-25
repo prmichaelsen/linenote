@@ -1,21 +1,24 @@
-import { OutputChannel, window } from 'vscode';
-import { time } from '../../utils/std/timer';
+import { OutputChannel, window } from "vscode";
+import { time } from "../../utils/std/timer";
 
 let _channel: OutputChannel;
 export const getOutputChannel = () => {
   if (!_channel) {
-    _channel = window.createOutputChannel('Line Note Plus');
+    _channel = window.createOutputChannel("Line Note Plus");
   }
   return _channel;
-}
+};
 
-const _timer = <T extends (...args: any[]) => any>(name: string, fn: T): (...args: Parameters<T>) => ReturnType<T> => {
+const _timer = <T extends (...args: any[]) => any>(
+  name: string,
+  fn: T
+): ((...args: Parameters<T>) => ReturnType<T>) => {
   return time(
-    fn, 
+    fn,
     () => null,
-    dms => getOutputChannel().appendLine(`[${name}]: ${dms}ms`)
-  )
-}
+    (dms) => getOutputChannel().appendLine(`[${name}]: ${dms}ms`)
+  );
+};
 export const log = {
   time: _timer,
-}
+};
