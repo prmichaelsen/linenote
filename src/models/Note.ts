@@ -94,15 +94,28 @@ export class Note implements NoteProps {
   }
 
   async open(options?: vscode.TextDocumentShowOptions): Promise<void> {
-    getNoteCache().set(this.uuid, this);
-    await vscode.commands.executeCommand(
-      "vscode.open",
-      vscode.Uri.file(this.selfPath),
-      {
-        ...getOpenNoteBehavior(),
-        ...options,
-      }
-    );
+    try {
+      getNoteCache().set(this.uuid, this);
+      await vscode.commands.executeCommand(
+        "vscode.open",
+        vscode.Uri.file(this.selfPath),
+        {
+          ...getOpenNoteBehavior(),
+          ...options,
+        }
+      );
+    } catch (e: any) {
+      e.context = {
+        ...e.context,
+        note: {
+          selfPath: this.selfPath,
+          targetPath: this.targetPath,
+          uuid: this.uuid,
+          line: this.line,
+        },
+      };
+      throw new Error(e);
+    }
   }
 
   async write(body: string): Promise<void> {

@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { Note } from "../../models/Note";
 import { filterResolved, splitArr } from "../../utils/utils";
 import { matchUuids } from "../../utils/helpers/match-helpers";
+import { getOutputChannel } from "../output/getOutputChannel";
 
 export class Decorator {
   context: vscode.ExtensionContext;
